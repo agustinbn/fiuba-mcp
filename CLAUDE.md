@@ -19,15 +19,16 @@ There is no linter. `build/` is gitignored and must be rebuilt after source chan
 
 ## Architecture
 
-Two source files, ESM (`"type": "module"`, NodeNext):
+ESM (`"type": "module"`, NodeNext), layered so that `tools/` → `moodle/` and nothing points back:
 
-- `src/moodle.ts` — Moodle web-service layer: session persistence (`~/.config/fiuba-mcp/session.json`, 0600), `login` (exchanges credentials for a `moodle_mobile_app` token via `/login/token.php`; the password is never stored), `ws()` (POST to `/webservice/rest/server.php`, nested params serialized by `flatten` as `a[0][b]=x`), `fetchFile`, and pure helpers (`stripHtml`, `date` in Buenos Aires time).
-- `src/index.ts` — the entry point does double duty: `argv[2] === 'login'` runs the interactive login CLI, otherwise it starts the MCP stdio server. All eight `fiuba_*` tools are declared through the local `tool()` helper, which wraps `registerTool`, marks them `readOnlyHint`, loads the session on every call, and JSON-stringifies the result.
+- `src/index.ts` — entry point: `argv[2] === 'login'` runs `cli/login.ts` (interactive login), otherwise `server.ts` starts the MCP stdio server.
+- `src/moodle/` — Moodle web-service layer, no MCP knowledge: `session.ts` (persistence in `~/.config/fiuba-mcp/session.json`, 0600), `login.ts` (exchanges credentials for a `moodle_mobile_app` token via `/login/token.php`; the password is never stored), `ws.ts` (`ws()` POSTs to `/webservice/rest/server.php`; nested params serialized by `flatten` as `a[0][b]=x`), `files.ts` (`fetchFile`), `format.ts` (pure helpers: `stripHtml`, `date` in Buenos Aires time).
+- `src/tools/` — one file per domain (`courses`, `files`, `calendar`, `assignments`, `forums`, `grades`), each exporting tools built with `defineTool()` (`define.ts`: marks them `readOnlyHint`, loads the session on every call, JSON-stringifies the result). `tools/index.ts` lists them all; `server.ts` registers that list.
 
-Things that span both files:
+Cross-cutting notes:
 
-- `NEEDED` in `moodle.ts` lists the Moodle web-service functions the tools call. Adding a tool that uses a new `wsfunction` means adding it there so `login` can warn when the campus has it disabled.
-- Imports use `.js` extensions (`./moodle.js`) in source, but tests import `../moodle.ts` directly; `src/__test__` is excluded from the `tsc` build.
-- `fetchFile` only downloads from the session's own origin (the token is appended to the URL), rewrites `/pluginfile.php` to `/webservice/pluginfile.php`, caps files at 25 MB, and detects Moodle's JSON-body errors. Keep those guards when touching it.
-- Forum post content is user-authored; `UNTRUSTED` in `index.ts` is the prompt-injection warning attached to discussion tool descriptions.
+- `NEEDED` in `moodle/login.ts` lists the Moodle web-service functions the tools call. Adding a tool means exporting it from its `tools/*.ts` file and listing it in `tools/index.ts`; if it uses a new `wsfunction`, add that to `NEEDED` too so `login` can warn when the campus has it disabled.
+- Relative imports use `.ts` extensions in source (`rewriteRelativeImportExtensions` turns them into `.js` in `build/`), so tests can import modules directly under Node's type stripping; `src/__test__` is excluded from the `tsc` build.
+- `fetchFile` (`moodle/files.ts`) only downloads from the session's own origin (the token is appended to the URL), rewrites `/pluginfile.php` to `/webservice/pluginfile.php`, caps files at 25 MB, and detects Moodle's JSON-body errors. Keep those guards when touching it.
+- Forum post content is user-authored; `UNTRUSTED` in `tools/forums.ts` is the prompt-injection warning attached to discussion tool descriptions.
 - `FIUBA_CAMPUS_URL` selects the campus (default grado; posgrado is `campusposgrado.fi.uba.ar`).

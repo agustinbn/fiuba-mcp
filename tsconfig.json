@@ -6,6 +6,7 @@
     "outDir": "build",
     "rootDir": "src",
     "strict": true,
+    "rewriteRelativeImportExtensions": true,
     "skipLibCheck": true,
     "types": ["node"]
   },

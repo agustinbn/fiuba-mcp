@@ -1,19 +1,22 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { date, flatten, stripHtml } from '../moodle.ts';
+import { date, stripHtml } from '../moodle/format.ts';
+import { flatten } from '../moodle/ws.ts';
 
 test('flatten nests arrays and objects the way Moodle REST expects', () => {
   const p = flatten({ courseids: [3, 7], options: [{ name: 'x', value: true }], skip: undefined });
   assert.equal(
     p.toString(),
-    'courseids%5B0%5D=3&courseids%5B1%5D=7&options%5B0%5D%5Bname%5D=x&options%5B0%5D%5Bvalue%5D=1',
+    'courseids%5B0%5D=3&courseids%5B1%5D=7&options%5B0%5D%5Bname%5D=x&options%5B0%5D%5Bvalue%5D=1'
   );
 });
 
 test('stripHtml drops tags and decodes entities', () => {
   assert.equal(
-    stripHtml('<p>Entrega&nbsp;del <b>TP&nbsp;1</b></p><p>Mi&eacute;rcoles &amp; jueves &#191;ok&#x3F;</p>'),
-    'Entrega del TP 1\nMiércoles & jueves ¿ok?',
+    stripHtml(
+      '<p>Entrega&nbsp;del <b>TP&nbsp;1</b></p><p>Mi&eacute;rcoles &amp; jueves &#191;ok&#x3F;</p>'
+    ),
+    'Entrega del TP 1\nMiércoles & jueves ¿ok?'
   );
   assert.equal(stripHtml(null), '');
 });
