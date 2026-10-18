@@ -1,0 +1,33 @@
+{
+  "name": "fiuba-mcp",
+  "version": "0.1.0",
+  "description": "MCP no oficial para el campus virtual (Moodle) de la Facultad de Ingeniería de la UBA",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "fiuba-mcp": "build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "test": "node --test src/__test__/*.test.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.3.1",
+    "unpdf": "^1.9.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "prettier": "3.9.10",
+    "typescript": "^7.0.2"
+  }
+}
