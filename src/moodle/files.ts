@@ -28,7 +28,7 @@ export async function fetchFile(s: Session, url: string) {
       throw new Error(
         err.errorcode === 'invalidtoken'
           ? `La sesión expiró: ${RELOGIN}.`
-          : (err.error ?? err.message)
+          : (err.error ?? err.message ?? err.errorcode)
       );
   }
   return { buf, type, path: u.pathname };
