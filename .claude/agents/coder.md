@@ -37,9 +37,11 @@ Your job is to make the change, verify it for real, and commit it.
   - relative imports use `.ts` extensions;
   - tool descriptions and code comments in English, runtime error messages in
     Spanish, user-facing docs (`README.md`) in Spanish;
-  - tests go in `src/__test__/*.test.ts` and never touch the network.
+  - every behavior change ships with tests in `src/__test__/*.test.ts` covering
+    every branch and error path (see "Testing policy" in CLAUDE.md); a bug fix
+    starts with a failing test; tests never touch the network.
 - Verify before committing, and never claim a pass you didn't run:
-  `npm run build`, `npm test`, `npm run format:check` (run `npm run format` if
+  `npm run build`, `npm run test:coverage` (must stay at 100%), `npm run format:check` (run `npm run format` if
   it fails on your files).
 - Commit the change yourself: stage only the files this item touched (never
   `git add -A`), Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:`,

@@ -64,8 +64,10 @@ with "N/A".
   vary by version), unhandled `exception`/`errorcode` bodies from the web
   service, timezone mistakes (dates are Buenos Aires time), unhandled promise
   rejections, dead code left behind.
-- **Tests**: new pure logic with no test in `src/__test__/`, or a test that
-  hits the network.
+- **Tests**: any behavior change without tests in `src/__test__/`, untested
+  branches or error paths (check coverage of touched files with `npm run test:coverage`), a bug fix with no
+  regression test, or a test that hits the network. Missing tests are at least
+  high severity.
 - **Language**: Spanish runtime errors, English tool descriptions/comments.
 - **Build cleanliness**: run `npm run build`, `npm test`, and
   `npm run format:check` yourself and report anything they surface on touched

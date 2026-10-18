@@ -9,6 +9,7 @@ Unofficial, read-only MCP server (stdio) for the FIUBA Moodle campus. User-facin
 ```sh
 npm run build         # tsc -> build/ (also runs on `npm install` via `prepare`)
 npm test              # node --test src/__test__/*.test.ts (Node 22+ runs .ts directly)
+npm run test:coverage # same, fails below 100% lines/branches/functions
 node --test --test-name-pattern="flatten" src/__test__/moodle.test.ts   # single test
 npm run format        # prettier --write . (format:check to verify)
 node build/index.js login                     # store a Moodle token (needs a TTY)
@@ -32,6 +33,18 @@ Cross-cutting notes:
 - `fetchFile` (`moodle/files.ts`) only downloads from the session's own origin (the token is appended to the URL), rewrites `/pluginfile.php` to `/webservice/pluginfile.php`, caps files at 25 MB, and detects Moodle's JSON-body errors. Keep those guards when touching it.
 - Forum post content is user-authored; `UNTRUSTED` in `tools/forums.ts` is the prompt-injection warning attached to discussion tool descriptions.
 - `FIUBA_CAMPUS_URL` selects the campus (default grado; posgrado is `campusposgrado.fi.uba.ar`).
+
+## Testing policy
+
+This server is developed by AI, so tests are the only guarantee that a change works. Every change ships with tests, with no exceptions:
+
+- Any `feat`/`fix`/`refactor` that changes behavior adds or updates tests in `src/__test__/*.test.ts` in the same commit. A bug fix starts with a test that fails without the fix.
+- Cover every case: each branch, the empty/null/missing-field responses Moodle sends, `exception`/`errorcode` bodies, invalid input, and the Spanish error messages. Stub `fetch`; tests never touch the network, the real campus or `~/.config/fiuba-mcp/`.
+- New tools are tested through their handler with a stubbed `ws()`/`fetch`: arguments sent to the `wsfunction`, shape of the output, and error paths.
+- Guards (`fetchFile` origin/size/JSON-error checks, `flatten` serialization, session file mode) need a test per guard that proves the bad input is rejected.
+- Coverage is 100% (lines, branches, functions) and must stay there: `npm run test:coverage` fails otherwise. Run it before every commit.
+- Tests run the real code: only `fetch` is stubbed, and `src/__test__/env.ts` (import it first) points the session file at a temp dir. Use the helpers in `src/__test__/helpers.ts` (`wsStub`, `callJson`, …).
+- Docs-only changes are the only ones exempt.
 
 ## Agents
 
