@@ -17,6 +17,7 @@
     "build": "tsc",
     "prepare": "tsc",
     "test": "node --test src/__test__/*.test.ts",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 src/__test__/*.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
